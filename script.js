@@ -1,66 +1,109 @@
-
 document.addEventListener("DOMContentLoaded", () => {
-  // Reveal on scroll
-  const els = document.querySelectorAll("section,.hero");
-  const io = new IntersectionObserver(entries=>{
-    entries.forEach(e=>{
-      if(e.isIntersecting){
-        e.target.style.opacity="1";
-        e.target.style.transform="translateY(0)";
+
+  // ===== COPY IP =====
+  window.copyIP = function () {
+    const ip = "arcanedungeon.xyz";
+    navigator.clipboard.writeText(ip);
+
+    const btn = document.querySelector(".ip-box button");
+    btn.innerText = "Copied!";
+    setTimeout(() => btn.innerText = "Copy IP", 1500);
+  };
+
+  // ===== SMOOTH SCROLL =====
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener("click", function (e) {
+      e.preventDefault();
+      document.querySelector(this.getAttribute("href")).scrollIntoView({
+        behavior: "smooth"
+      });
+    });
+  });
+
+  // ===== NAVBAR BLUR ON SCROLL =====
+  const navbar = document.querySelector(".navbar");
+
+  window.addEventListener("scroll", () => {
+    if (window.scrollY > 50) {
+      navbar.style.background = "rgba(10,10,20,0.7)";
+      navbar.style.backdropFilter = "blur(15px)";
+    } else {
+      navbar.style.background = "rgba(10,10,20,0.4)";
+      navbar.style.backdropFilter = "blur(12px)";
+    }
+  });
+
+  // ===== PARTICLE SYSTEM =====
+  const canvas = document.createElement("canvas");
+  document.body.appendChild(canvas);
+
+  canvas.style.position = "fixed";
+  canvas.style.top = 0;
+  canvas.style.left = 0;
+  canvas.style.zIndex = 0;
+  canvas.style.pointerEvents = "none";
+
+  const ctx = canvas.getContext("2d");
+
+  let w = canvas.width = window.innerWidth;
+  let h = canvas.height = window.innerHeight;
+
+  window.addEventListener("resize", () => {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  });
+
+  const particles = [];
+
+  for (let i = 0; i < 60; i++) {
+    particles.push({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      r: Math.random() * 2,
+      d: Math.random() * 1
+    });
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+
+    ctx.fillStyle = "rgba(181,140,255,0.7)";
+
+    particles.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
+
+      p.y -= p.d;
+
+      if (p.y < 0) {
+        p.y = h;
+        p.x = Math.random() * w;
       }
     });
-  },{threshold:0.15});
 
-  els.forEach(el=>{
-    el.style.opacity="0";
-    el.style.transform="translateY(40px)";
-    el.style.transition="opacity .8s ease, transform .8s ease";
-    io.observe(el);
-  });
-
-  // Back to top button
-  const btn=document.createElement("button");
-  btn.textContent="↑";
-  Object.assign(btn.style,{
-    position:"fixed",right:"20px",bottom:"20px",width:"48px",height:"48px",
-    borderRadius:"50%",border:"none",cursor:"pointer",fontSize:"22px",
-    display:"none",zIndex:"999"
-  });
-  document.body.appendChild(btn);
-
-  window.addEventListener("scroll",()=>{
-    btn.style.display=window.scrollY>300?"block":"none";
-  });
-  btn.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
-
-  // Magic particles
-  for(let i=0;i<25;i++){
-    const p=document.createElement("div");
-    Object.assign(p.style,{
-      position:"fixed",
-      width:"4px",height:"4px",borderRadius:"50%",
-      background:"rgba(255,255,255,.8)",
-      left:Math.random()*100+"vw",
-      top:Math.random()*100+"vh",
-      pointerEvents:"none",
-      opacity:".7",
-      zIndex:"0",
-      transition:"transform 8s linear"
-    });
-    document.body.appendChild(p);
-    const move=()=>{
-      p.style.transform=`translate(${(Math.random()-0.5)*120}px,${-150-Math.random()*200}px)`;
-      setTimeout(()=>{
-        p.style.transition="none";
-        p.style.transform="translate(0,0)";
-        p.style.left=Math.random()*100+"vw";
-        p.style.top="100vh";
-        requestAnimationFrame(()=>{
-          p.style.transition="transform 8s linear";
-          move();
-        });
-      },8000);
-    };
-    move();
+    requestAnimationFrame(draw);
   }
+
+  draw();
+
+  // ===== FADE IN EFFECT =====
+  const elements = document.querySelectorAll(".card, h2, .hero-content");
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = 1;
+        entry.target.style.transform = "translateY(0)";
+      }
+    });
+  }, { threshold: 0.1 });
+
+  elements.forEach(el => {
+    el.style.opacity = 0;
+    el.style.transform = "translateY(30px)";
+    el.style.transition = "0.8s ease";
+    observer.observe(el);
+  });
+
 });
